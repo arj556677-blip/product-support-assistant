@@ -1,1 +1,153 @@
-{% extends "base.html" %}{% block content %}<h2>Vision</h2><input id="i" type="file" accept="image/*"><textarea id="p" rows="3">Describe this image in detail. Identify objects and readable text.</textarea><button onclick="go()">Analyze Image</button><pre id="o"></pre><script>async function go(){let f=new FormData();f.append('image',i.files[0]);f.append('prompt',p.value);o.textContent="Loading...";let r=await fetch('/api/vision',{method:'POST',body:f});let j=await r.json();o.textContent=j.result||j.error}</script>{% endblock %}
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .page-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .page-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #FFF;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .dropzone {
+    border: 2px dashed var(--border-color);
+    border-radius: 14px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(31, 41, 55, 0.3);
+    transition: all 0.2s;
+  }
+  .dropzone:hover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+  }
+  input.styled-input {
+    width: 100%;
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #FFF;
+    font-size: 14px;
+    outline: none;
+    margin-top: 16px;
+  }
+  .btn-action {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .output-box {
+    background: rgba(11, 15, 25, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 14px;
+    color: #E5E7EB;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    margin-top: 20px;
+  }
+  #img-preview {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 10px;
+    margin-top: 14px;
+    display: none;
+  }
+</style>
+
+<div class="page-card">
+  <div class="page-title">
+    <i class="fa-solid fa-eye" style="color: var(--primary);"></i> Vision Analysis Lab
+  </div>
+  <div class="page-subtitle">
+    Upload hardware inspection photos or defect screenshots to analyze using Azure OpenAI Multimodal Vision.
+  </div>
+
+  <div class="dropzone" onclick="document.getElementById('vision-file').click()">
+    <i class="fa-solid fa-cloud-arrow-up" style="font-size: 32px; color: var(--secondary); margin-bottom: 10px;"></i>
+    <p style="font-size: 14px; font-weight: 600; color: #FFF;">Click or drop image file here</p>
+    <p style="font-size: 12px; color: var(--text-dim);">Supports JPG, PNG, WEBP (Max 25MB)</p>
+    <input type="file" id="vision-file" accept="image/*" style="display: none;" onchange="previewImage()">
+    <img id="img-preview" alt="Preview">
+  </div>
+
+  <input type="text" id="vision-prompt" class="styled-input" placeholder="Prompt (e.g. Describe hardware defect, read serial number, inspect ports...)" value="Describe this product image in detail and identify any hardware defects or visible ports.">
+
+  <div>
+    <button class="btn-action" onclick="runVision()">
+      Analyze Image <i class="fa-solid fa-microscope"></i>
+    </button>
+  </div>
+
+  <div id="vision-output" class="output-box" style="display: none;"></div>
+</div>
+
+<script>
+  function previewImage() {
+    const file = document.getElementById("vision-file").files[0];
+    const img = document.getElementById("img-preview");
+    if (file) {
+      img.src = URL.createObjectURL(file);
+      img.style.display = "inline-block";
+    }
+  }
+
+  async function runVision() {
+    const file = document.getElementById("vision-file").files[0];
+    const prompt = document.getElementById("vision-prompt").value.trim();
+    if (!file) {
+      alert("Please select an image file.");
+      return;
+    }
+
+    const out = document.getElementById("vision-output");
+    out.style.display = "block";
+    out.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing image with Vision model...`;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("prompt", prompt);
+
+    try {
+      const res = await fetch("/api/vision", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (data.error) {
+        out.innerHTML = `<span style="color: #EF4444;">Error: ${data.error}</span>`;
+      } else {
+        out.innerHTML = data.result.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+      }
+    } catch(e) {
+      out.innerHTML = `<span style="color: #EF4444;">Error analyzing image.</span>`;
+    }
+  }
+</script>
+{% endblock %}

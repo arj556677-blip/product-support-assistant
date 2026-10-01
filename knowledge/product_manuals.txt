@@ -1,0 +1,39 @@
+# TechPro Consumer Electronics - Product Manuals & Specifications
+
+## 1. TechPro Laptop X1 Ultra
+- Model ID: TPL-X1-2026
+- Processor: Intel Core Ultra 7 155H / 16-Core up to 4.8 GHz
+- Memory: 32 GB LPDDR5X 7467 MHz (soldered, dual-channel)
+- Storage: 1 TB PCIe Gen4 NVMe M.2 SSD
+- Display: 14.0-inch 2.8K (2880x1800) OLED 120Hz, 100% DCI-P3, 500 nits HDR peak brightness
+- Battery & Power: 75 Wh Lithium-Polymer battery. Supports 100W USB-C Fast Charging (0 to 60% in 35 minutes). Battery life up to 14 hours video playback.
+- Connectivity: Wi-Fi 6E (802.11ax), Bluetooth 5.3, 2x Thunderbolt 4 (USB-C), 1x USB-A 3.2 Gen 2, 1x HDMI 2.1, 3.5mm Headphone/Mic Combo.
+- Operating System: Windows 11 Pro 64-bit
+- Audio: Quad-speaker array with Dolby Atmos tuning, dual studio mics with AI noise suppression.
+- Dimensions & Weight: 312 x 221 x 14.9 mm, Weight: 1.28 kg (2.82 lbs).
+
+## 2. TechPro Wireless Earbuds Air Pro
+- Model ID: TPA-EAR-PRO
+- Drivers: 11mm Custom Dynamic Drivers with High-Res Audio certification.
+- Active Noise Cancellation (ANC): Hybrid ANC up to 45dB with Transparency Mode and Adaptive ANC adjustment.
+- Battery Life: 8 hours playback per charge (ANC off), 6 hours (ANC on). Total battery life with charging case: 32 hours.
+- Charging: USB-C Fast Charge (10 minutes charge gives 2 hours playback) and Qi Wireless Charging case.
+- Water Resistance: IPX5 water and sweat resistance for earbuds, IPX4 for case.
+- Microphones: 6-mic beamforming array with AI Wind Noise Reduction.
+- Bluetooth Version: Bluetooth 5.4 with multipoint connection (pair 2 devices simultaneously). Codecs: AAC, SBC, LDAC.
+
+## 3. TechPro Smartwatch Ultra 2
+- Model ID: TPS-WATCH-U2
+- Screen: 1.96-inch AMOLED Touchscreen, 410x502 resolution, Always-On Display, 1000 nits peak.
+- Body & Glass: Titanium alloy casing with Sapphire crystal glass screen.
+- Health Sensors: Optical Heart Rate Monitor, SpO2 Blood Oxygen Sensor, ECG sensor, Skin Temperature Sensor, 3-axis Accelerometer, Gyroscope, Altimeter.
+- Battery: 450 mAh Li-ion battery. Battery life up to 5 days normal usage, 14 days in Power Saver Mode.
+- GPS: Dual-frequency GPS (L1+L5) for precision route tracking.
+- Water Resistance: 5 ATM (50 meters water resistance), suitable for swimming.
+
+## 4. TechPro 7-in-1 Multiport USB-C Hub
+- Model ID: TPH-HUB-7IN1
+- Ports: 1x HDMI 2.0 (4K@60Hz output), 1x USB-C Power Delivery 100W Pass-through, 3x USB-A 3.0 (5Gbps data transfer), 1x SD Card Reader (UHS-I 104MB/s), 1x microSD Card Reader.
+- Enclosure: Premium Anodized Aluminum with heat-dissipation design.
+- Cable Length: 15 cm braided USB-C cable.
+- Compatibility: Windows, macOS, ChromeOS, iPadOS, Android. Plug-and-play (no drivers required).

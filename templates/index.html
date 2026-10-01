@@ -1,0 +1,1037 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* Dashboard Header */
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .dashboard-title h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dashboard-title p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Custom Tab Bar */
+  .tab-bar {
+    display: flex;
+    gap: 8px;
+    background: rgba(17, 24, 39, 0.6);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 24px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .tab-btn:hover {
+    color: #FFF;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .tab-btn.active {
+    background: var(--primary);
+    color: #FFF;
+    box-shadow: 0 0 15px var(--primary-glow);
+  }
+
+  /* Tab View Content Sections */
+  .tab-pane {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* CHAT TAB STYLES */
+  .chat-container {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+    height: 680px;
+  }
+
+  .chat-main {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-header-bar {
+    padding: 14px 20px;
+    background: rgba(11, 15, 25, 0.5);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .message-row {
+    display: flex;
+    gap: 12px;
+    max-width: 85%;
+  }
+
+  .message-row.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  .message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .user .message-avatar {
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    color: white;
+  }
+
+  .assistant .message-avatar {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+  }
+
+  .message-bubble {
+    background: rgba(31, 41, 55, 0.8);
+    border: 1px solid var(--border-color);
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 14px;
+    color: #F3F4F6;
+    line-height: 1.6;
+    position: relative;
+  }
+
+  .user .message-bubble {
+    background: var(--primary);
+    border-color: var(--primary-hover);
+    color: white;
+    border-top-right-radius: 4px;
+  }
+
+  .assistant .message-bubble {
+    border-top-left-radius: 4px;
+  }
+
+  /* Citations Badges */
+  .citations-box {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .citation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(6, 182, 212, 0.15);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    color: #67E8F9;
+    border-radius: 6px;
+  }
+
+  /* Chat Input Area */
+  .chat-input-area {
+    padding: 16px 20px;
+    background: rgba(11, 15, 25, 0.8);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .chat-input-area input {
+    flex: 1;
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #FFF;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .chat-input-area input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--primary-glow);
+  }
+
+  /* Speech Microphone Button */
+  .btn-mic {
+    width: 44px;
+    height: 44px;
+    background: rgba(31, 41, 55, 0.8);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+
+  .btn-mic:hover {
+    color: #FFF;
+    background: rgba(99, 102, 241, 0.2);
+    border-color: var(--primary);
+  }
+
+  .btn-mic.recording {
+    background: #EF4444;
+    border-color: #F87171;
+    color: white;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    animation: pulseMic 1.2s infinite;
+  }
+
+  @keyframes pulseMic {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  .btn-send {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 0 20px;
+    height: 44px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-send:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 0 15px var(--primary-glow);
+  }
+
+  /* Sidebar Suggestion Box */
+  .chat-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sidebar-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 18px;
+  }
+
+  .sidebar-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #FFF;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .prompt-pill {
+    width: 100%;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .prompt-pill:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: var(--primary);
+    color: #FFF;
+  }
+
+  /* WARRANTY TAB STYLES */
+  .warranty-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+  }
+
+  .lookup-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .lookup-form group {
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .lookup-form label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .lookup-form input {
+    width: 100%;
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 10px;
+    color: #FFF;
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .result-card {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 12px;
+    display: none;
+  }
+
+  .result-card.active-warranty {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34D399;
+  }
+
+  .result-card.expired-warranty {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #F87171;
+  }
+
+  /* Data Table */
+  .table-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    overflow-x: auto;
+  }
+
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+  }
+
+  table.data-table th {
+    padding: 10px 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  table.data-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #E5E7EB;
+  }
+
+  .badge-status {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .badge-status.active {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34D399;
+  }
+
+  .badge-status.expired {
+    background: rgba(239, 68, 68, 0.2);
+    color: #F87171;
+  }
+
+  /* EVALUATION TAB STYLES */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .metric-card .value {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 8px 0;
+    background: linear-gradient(135deg, #FFF, #818CF8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .metric-card .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .btn-eval {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-eval:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  }
+</style>
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+  <div class="dashboard-title">
+    <h2><i class="fa-solid fa-shield-halved" style="color: #6366F1;"></i> AI Support Workspace</h2>
+    <p>Retrieval-Augmented Generation (RAG), Integrated Voice Input & SQLite Warranty Platform</p>
+  </div>
+  <div>
+    <button class="prompt-pill" style="margin: 0;" onclick="resetSession()">
+      <i class="fa-solid fa-rotate-right"></i> Reset Session History
+    </button>
+  </div>
+</div>
+
+<!-- Tab Navigation Bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('chat-tab')">
+    <i class="fa-solid fa-comments"></i> Support Assistant & Voice
+  </button>
+  <button class="tab-btn" onclick="switchTab('warranty-tab')">
+    <i class="fa-solid fa-id-card"></i> Warranty Checker
+  </button>
+  <button class="tab-btn" onclick="switchTab('knowledge-tab')">
+    <i class="fa-solid fa-book-bookmark"></i> Knowledge Base
+  </button>
+  <button class="tab-btn" onclick="switchTab('eval-tab')">
+    <i class="fa-solid fa-chart-column"></i> Benchmark Evaluation
+  </button>
+</div>
+
+<!-- TAB 1: SUPPORT CHAT ASSISTANT WITH INTEGRATED SPEECH -->
+<div id="chat-tab" class="tab-pane active">
+  <div class="chat-container">
+    <div class="chat-main">
+      <div class="chat-header-bar">
+        <span style="font-size: 13px; font-weight: 600; color: #FFF; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-circle" style="color: #10B981; font-size: 8px;"></i> Grounded RAG + Voice Mode
+        </span>
+        <span style="font-size: 11px; color: var(--text-dim);" id="session-label">Session ID: active_user</span>
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        <!-- Welcome Assistant Message -->
+        <div class="message-row assistant">
+          <div class="message-avatar"><i class="fa-solid fa-robot"></i></div>
+          <div class="message-bubble">
+            Hello! I am your <strong>TechPro AI Product Support Assistant</strong>.<br><br>
+            Ask me anything about product specs, troubleshooting steps, warranty coverage, or type/speak a serial number (e.g. <code>SN1001</code>).<br><br>
+            💡 <strong>Voice Input Enabled:</strong> Click the microphone icon <i class="fa-solid fa-microphone" style="color: var(--secondary);"></i> in the chat bar below to speak directly!
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Area with Microphone Speech Button -->
+      <div class="chat-input-area">
+        <button class="btn-mic" id="mic-btn" onclick="toggleSpeechRecognition()" title="Click to speak your question">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+        <input type="text" id="chat-input" placeholder="Type or speak a question (e.g. Is SN1001 under warranty?)..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button class="btn-send" onclick="sendMessage()">
+          Send <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Sidebar Prompt Suggestions -->
+    <div class="chat-sidebar">
+      <div class="sidebar-card">
+        <h3><i class="fa-solid fa-lightbulb" style="color: #F59E0B;"></i> Sample Queries</h3>
+        <button class="prompt-pill" onclick="sendQuickPrompt('Check warranty for SN1001')">
+          <span>Is SN1001 under warranty?</span> <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <button class="prompt-pill" onclick="sendQuickPrompt('My TechPro Laptop X1 is not charging')">
+          <span>Laptop X1 not charging</span> <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <button class="prompt-pill" onclick="sendQuickPrompt('What is the battery life of TechPro Laptop X1?')">
+          <span>Laptop X1 Battery Specs</span> <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <button class="prompt-pill" onclick="sendQuickPrompt('How do I reset my TechPro Earbuds Air Pro?')">
+          <span>Reset Earbuds Air Pro</span> <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <button class="prompt-pill" onclick="sendQuickPrompt('Who won yesterday\'s cricket match?')">
+          <span>Test Out-of-Domain Query</span> <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-card">
+        <h3><i class="fa-solid fa-microphone-lines" style="color: var(--secondary);"></i> Speech & Voice Features</h3>
+        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+          • Click the 🎙️ mic button in the input bar to talk.<br>
+          • Voice is automatically transcribed in real time.<br>
+          • Uses Chrome/Edge Speech API with Azure Speech fallback.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: WARRANTY CHECKER & DATABASE VIEW -->
+<div id="warranty-tab" class="tab-pane">
+  <div class="warranty-grid">
+    <div class="lookup-card">
+      <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 16px;">
+        <i class="fa-solid fa-magnifying-glass" style="color: var(--secondary);"></i> Lookup Warranty Status
+      </h3>
+      <div class="lookup-form">
+        <label>ENTER SERIAL NUMBER</label>
+        <input type="text" id="warranty-sn-input" placeholder="e.g. SN1001, SN1005" value="SN1001">
+        <button class="btn-send" style="width: 100%; margin-top: 14px; justify-content: center;" onclick="checkWarrantyDirect()">
+          Verify Warranty <i class="fa-solid fa-shield-check"></i>
+        </button>
+      </div>
+
+      <div id="warranty-result" class="result-card"></div>
+    </div>
+
+    <div class="table-card">
+      <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 16px;">
+        <i class="fa-solid fa-database" style="color: var(--primary);"></i> Authoritative SQLite Warranty Database
+      </h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Serial No</th>
+            <th>Product Name</th>
+            <th>Customer</th>
+            <th>Purchase Date</th>
+            <th>Care+</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="warranty-table-body">
+          <tr><td colspan="6" style="text-align: center;">Loading warranty database...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: KNOWLEDGE BASE EXPLORER -->
+<div id="knowledge-tab" class="tab-pane">
+  <div class="table-card" style="margin-bottom: 24px;">
+    <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 8px;">
+      <i class="fa-solid fa-book" style="color: #F59E0B;"></i> Ingested Knowledge Base Documents
+    </h3>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+      The RAG Engine indexes product manuals, troubleshooting procedures, and policy guides into semantic chunks.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+      <div class="sidebar-card">
+        <h3><i class="fa-solid fa-file-lines" style="color: #818CF8;"></i> product_manuals.txt</h3>
+        <p style="font-size: 12px; color: var(--text-dim);">Detailed specs for Laptop X1, Earbuds Air Pro, Smartwatch Ultra 2, and 7-in-1 Hub.</p>
+      </div>
+      <div class="sidebar-card">
+        <h3><i class="fa-solid fa-file-lines" style="color: #34D399;"></i> troubleshooting_guide.txt</h3>
+        <p style="font-size: 12px; color: var(--text-dim);">Step-by-step resolution guides for power, charging, pairing, and display output.</p>
+      </div>
+      <div class="sidebar-card">
+        <h3><i class="fa-solid fa-file-lines" style="color: #F472B6;"></i> faq_and_policies.txt</h3>
+        <p style="font-size: 12px; color: var(--text-dim);">12-month standard warranty, 30-day return policy, Care+ terms, support escalation.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 16px;">
+      <i class="fa-solid fa-layer-group" style="color: var(--secondary);"></i> Semantic Text Chunks Index
+    </h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Chunk ID</th>
+          <th>Source Document</th>
+          <th>Section Header</th>
+          <th>Text Preview</th>
+        </tr>
+      </thead>
+      <tbody id="chunks-table-body">
+        <tr><td colspan="4" style="text-align: center;">Loading indexed chunks...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB 4: BENCHMARK EVALUATION DASHBOARD -->
+<div id="eval-tab" class="tab-pane">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div>
+      <h3 style="font-size: 18px; font-weight: 700; color: #FFF;">System Performance & Evaluation Suite</h3>
+      <p style="font-size: 13px; color: var(--text-muted);">Runs 35 automated test cases evaluating RAG accuracy, grounding rate, and latency.</p>
+    </div>
+    <button class="btn-eval" onclick="runEvaluation()">
+      <i class="fa-solid fa-play"></i> Run Benchmark Test
+    </button>
+  </div>
+
+  <!-- Metric Cards Grid -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="label">TASK SUCCESS RATE</div>
+      <div class="value" id="metric-success">--%</div>
+      <div style="font-size: 11px; color: var(--text-dim);">Target: > 80%</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">RETRIEVAL RELEVANCE</div>
+      <div class="value" id="metric-relevance">--%</div>
+      <div style="font-size: 11px; color: var(--text-dim);">Target: > 85%</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">GROUNDED ANSWER RATE</div>
+      <div class="value" id="metric-grounded">--%</div>
+      <div style="font-size: 11px; color: var(--text-dim);">Target: 100%</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">AVG LATENCY</div>
+      <div class="value" id="metric-latency">-- ms</div>
+      <div style="font-size: 11px; color: var(--text-dim);">Target: < 800ms</div>
+    </div>
+  </div>
+
+  <!-- Detailed Benchmark Results Table -->
+  <div class="table-card">
+    <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 16px;">
+      <i class="fa-solid fa-list-check"></i> Benchmark Test Case Breakdown
+    </h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Category</th>
+          <th>Test Query</th>
+          <th>Intent Recognized</th>
+          <th>Latency</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="eval-table-body">
+        <tr><td colspan="6" style="text-align: center; padding: 20px;">Click 'Run Benchmark Test' to evaluate system accuracy.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  let sessionId = "user_session_" + Math.random().toString(36).substring(7);
+  document.getElementById("session-label").innerText = "Session: " + sessionId.substring(0, 10);
+
+  function switchTab(tabId) {
+    document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    
+    document.getElementById(tabId).classList.add("active");
+    if (event && event.currentTarget) event.currentTarget.classList.add("active");
+
+    if (tabId === "warranty-tab") loadWarrantyTable();
+    if (tabId === "knowledge-tab") loadKnowledgeChunks();
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById("chat-input");
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    input.value = "";
+    appendMessage("user", msg);
+
+    const loadingId = appendLoadingMessage();
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg, session_id: sessionId })
+      });
+      const data = await res.json();
+      removeMessage(loadingId);
+
+      if (data.error) {
+        appendMessage("assistant", "❌ Error: " + data.error);
+      } else {
+        appendMessage("assistant", data.answer, data.sources);
+      }
+    } catch (e) {
+      removeMessage(loadingId);
+      appendMessage("assistant", "❌ System error while communicating with support assistant.");
+    }
+  }
+
+  function sendQuickPrompt(promptText) {
+    switchTab('chat-tab');
+    document.getElementById("chat-input").value = promptText;
+    sendMessage();
+  }
+
+  function appendMessage(role, text, sources = []) {
+    const container = document.getElementById("chat-messages");
+    const row = document.createElement("div");
+    row.className = `message-row ${role}`;
+
+    const avatarIcon = role === "user" ? "fa-user" : "fa-robot";
+    let formattedText = text.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+    let citationsHTML = "";
+    if (sources && sources.length > 0) {
+      citationsHTML = `<div class="citations-box">`;
+      sources.forEach(s => {
+        const docName = s.document || "Knowledge Base";
+        const section = s.section ? ` - ${s.section}` : "";
+        citationsHTML += `<span class="citation-badge"><i class="fa-solid fa-bookmark"></i> ${docName}${section}</span>`;
+      });
+      citationsHTML += `</div>`;
+    }
+
+    row.innerHTML = `
+      <div class="message-avatar"><i class="fa-solid ${avatarIcon}"></i></div>
+      <div class="message-bubble">
+        ${formattedText}
+        ${citationsHTML}
+      </div>
+    `;
+
+    container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function appendLoadingMessage() {
+    const container = document.getElementById("chat-messages");
+    const id = "loading_" + Date.now();
+    const row = document.createElement("div");
+    row.id = id;
+    row.className = "message-row assistant";
+    row.innerHTML = `
+      <div class="message-avatar"><i class="fa-solid fa-robot"></i></div>
+      <div class="message-bubble" style="color: var(--text-muted);">
+        <i class="fa-solid fa-circle-notch fa-spin"></i> Processing with RAG & Azure OpenAI...
+      </div>
+    `;
+    container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+    return id;
+  }
+
+  function removeMessage(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
+
+  function resetSession() {
+    sessionId = "user_session_" + Math.random().toString(36).substring(7);
+    document.getElementById("session-label").innerText = "Session: " + sessionId.substring(0, 10);
+    document.getElementById("chat-messages").innerHTML = `
+      <div class="message-row assistant">
+        <div class="message-avatar"><i class="fa-solid fa-robot"></i></div>
+        <div class="message-bubble">
+          Session history reset. How can I assist you?
+        </div>
+      </div>
+    `;
+  }
+
+  /* SPEECH RECOGNITION (VOICE TO TEXT) INTEGRATION */
+  let recognition = null;
+  let isRecording = false;
+
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Web Speech API is not supported in this browser. Try Chrome or Edge!");
+      return null;
+    }
+    const rec = new SpeechRecognition();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+
+    rec.onstart = function() {
+      isRecording = true;
+      const btn = document.getElementById("mic-btn");
+      btn.classList.add("recording");
+      btn.title = "Listening... Speak now";
+      document.getElementById("chat-input").placeholder = "Listening to your voice...";
+    };
+
+    rec.onresult = function(event) {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      document.getElementById("chat-input").value = transcript;
+    };
+
+    rec.onerror = function(event) {
+      stopSpeechRecognition();
+      console.warn("Speech recognition error:", event.error);
+    };
+
+    rec.onend = function() {
+      stopSpeechRecognition();
+      // Auto-send if voice transcription captured text
+      const captured = document.getElementById("chat-input").value.trim();
+      if (captured) {
+        sendMessage();
+      }
+    };
+
+    return rec;
+  }
+
+  function toggleSpeechRecognition() {
+    if (!recognition) {
+      recognition = initSpeechRecognition();
+    }
+    if (!recognition) return;
+
+    if (isRecording) {
+      recognition.stop();
+    } else {
+      try {
+        recognition.start();
+      } catch(e) {
+        recognition.stop();
+      }
+    }
+  }
+
+  function stopSpeechRecognition() {
+    isRecording = false;
+    const btn = document.getElementById("mic-btn");
+    if (btn) {
+      btn.classList.remove("recording");
+      btn.title = "Click to speak your question";
+    }
+    const input = document.getElementById("chat-input");
+    if (input) {
+      input.placeholder = "Type or speak a question (e.g. Is SN1001 under warranty?)...";
+    }
+  }
+
+  /* WARRANTY TAB FUNCTIONS */
+  async function checkWarrantyDirect() {
+    const sn = document.getElementById("warranty-sn-input").value.trim();
+    if (!sn) return;
+
+    const resCard = document.getElementById("warranty-result");
+    resCard.style.display = "block";
+    resCard.className = "result-card";
+    resCard.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\"></i> Querying SQLite database...";
+
+    try {
+      const res = await fetch("/api/warranty/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ serial_number: sn })
+      });
+      const data = await res.json();
+
+      if (!data.found) {
+        resCard.className = "result-card expired-warranty";
+        resCard.innerHTML = `<strong>⚠️ Serial Not Found</strong><br>${data.message}`;
+      } else {
+        const isActive = data.is_active;
+        resCard.className = isActive ? "result-card active-warranty" : "result-card expired-warranty";
+        resCard.innerHTML = `
+          <strong>${isActive ? "✅ ACTIVE WARRANTY" : "❌ WARRANTY EXPIRED"}</strong><br>
+          Product: <strong>${data.product_name}</strong><br>
+          Customer: ${data.customer_name}<br>
+          Purchase Date: ${data.purchase_date}<br>
+          Expiration Date: <strong>${data.expiry_date}</strong><br>
+          Care+ Protection: ${data.care_plus ? "Included" : "Standard"}
+        `;
+      }
+    } catch (e) {
+      resCard.className = "result-card expired-warranty";
+      resCard.innerHTML = "Error verifying serial number.";
+    }
+  }
+
+  async function loadWarrantyTable() {
+    try {
+      const res = await fetch("/api/warranties");
+      const data = await res.json();
+      const tbody = document.getElementById("warranty-table-body");
+      tbody.innerHTML = "";
+
+      data.warranties.forEach(w => {
+        const isActive = w.status.toUpperCase() === "ACTIVE";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><code style="color: #818CF8;">${w.serial_number}</code></td>
+          <td>${w.product_name}</td>
+          <td>${w.customer_name}</td>
+          <td>${w.purchase_date}</td>
+          <td>${w.care_plus ? "Yes" : "No"}</td>
+          <td><span class="badge-status ${isActive ? 'active' : 'expired'}">${w.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (e) {}
+  }
+
+  /* KNOWLEDGE BASE TAB FUNCTIONS */
+  async function loadKnowledgeChunks() {
+    try {
+      const res = await fetch("/api/knowledge");
+      const data = await res.json();
+      const tbody = document.getElementById("chunks-table-body");
+      tbody.innerHTML = "";
+
+      data.chunks.forEach(c => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><code style="color: #67E8F9;">${c.id}</code></td>
+          <td>${c.source}</td>
+          <td><strong>${c.section}</strong></td>
+          <td style="font-size: 12px; color: var(--text-muted);">${c.text_preview}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (e) {}
+  }
+
+  /* EVALUATION TAB FUNCTIONS */
+  async function runEvaluation() {
+    const tbody = document.getElementById("eval-table-body");
+    tbody.innerHTML = "<tr><td colspan=\"6\" style=\"text-align: center; padding: 20px;\"><i class=\"fa-solid fa-spinner fa-spin\"></i> Running 35 benchmark test cases...</td></tr>";
+
+    try {
+      const res = await fetch("/api/evaluate", { method: "POST" });
+      const data = await res.json();
+
+      document.getElementById("metric-success").innerText = data.task_success_rate + "%";
+      document.getElementById("metric-relevance").innerText = data.retrieval_relevance + "%";
+      document.getElementById("metric-grounded").innerText = data.grounded_answer_rate + "%";
+      document.getElementById("metric-latency").innerText = data.average_latency_ms + " ms";
+
+      tbody.innerHTML = "";
+      data.detailed_results.forEach(r => {
+        const tr = document.createElement("tr");
+        const statusBadge = r.success 
+          ? '<span class="badge-status active">PASS</span>' 
+          : '<span class="badge-status expired">FAIL</span>';
+
+        tr.innerHTML = `
+          <td>${r.id}</td>
+          <td><span style="font-size: 11px; padding: 2px 6px; background: rgba(255,255,255,0.08); border-radius: 4px;">${r.category}</span></td>
+          <td>${r.query}</td>
+          <td><code>${r.intent}</code></td>
+          <td>${r.latency_ms} ms</td>
+          <td>${statusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (e) {
+      tbody.innerHTML = "<tr><td colspan=\"6\" style=\"color: #EF4444; text-align: center;\">Error running evaluation suite.</td></tr>";
+    }
+  }
+</script>
+{% endblock %}

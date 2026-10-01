@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: product-support-assistant
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: AZURE_OPENAI_ENDPOINT
+        sync: false
+      - key: AZURE_OPENAI_API_KEY
+        sync: false
+      - key: TEXT_MODEL_DEPLOYMENT
+        value: gpt-4.1-mini
+      - key: VISION_MODEL_DEPLOYMENT
+        value: gpt-4.1-mini
+      - key: SPEECH_ENDPOINT
+        sync: false
+      - key: SPEECH_API_KEY
+        sync: false
+      - key: CONTENT_ENDPOINT
+        sync: false
+      - key: CONTENT_API_KEY
+        sync: false
+      - key: FOUNDRY_PROJECT_ENDPOINT
+        sync: false
+      - key: FOUNDRY_API_KEY
+        sync: false

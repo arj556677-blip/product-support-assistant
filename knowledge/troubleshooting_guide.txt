@@ -1,0 +1,35 @@
+# TechPro Consumer Electronics - Troubleshooting & Repair Guide
+
+## 1. Laptop Power & Charging Issues (TechPro Laptop X1)
+- Symptom: Laptop is not charging or charging light indicator remains off when plugged in.
+- Step 1: Verify the 100W USB-C wall adapter is plugged securely into a working wall outlet and connected to the primary Thunderbolt 4 port on the left side of the laptop.
+- Step 2: Disconnect the adapter from both the wall and laptop for 30 seconds to reset internal thermal fuse protection, then reconnect firmly.
+- Step 3: Inspect the USB-C cable and ports for dust, lint, or physical damage. Clean gently with dry compressed air if necessary.
+- Step 4: Perform a EC (Embedded Controller) Hard Reset: Turn off the laptop, press and hold the Power Button continuously for 15 seconds until the status LED flashes 3 times, then release and turn on.
+- Step 5: If the laptop turns on but battery status shows "Plugged in, not charging", open TechPro Vantage app -> Battery Settings -> Disable "Battery Charge Threshold / Conservation Mode".
+
+## 2. Laptop Overheating & Fan Noise
+- Symptom: Fan running constantly at high speed, casing feels excessively hot.
+- Step 1: Ensure vents on the bottom and rear hinge of the laptop are unobstructed. Avoid placing the laptop on soft surfaces like beds or blankets.
+- Step 2: Open Task Manager (Ctrl+Shift+Esc) to identify processes consuming high CPU/GPU resources and end non-essential high-usage tasks.
+- Step 3: Open TechPro Control Center and switch Thermal Mode from "Performance Mode" to "Balanced Mode" or "Quiet Mode".
+- Step 4: Ensure system BIOS and Thermal Management drivers are updated to the latest version via TechPro Support site.
+
+## 3. Wireless Earbuds Pairing & Connectivity (TechPro Earbuds Air Pro)
+- Symptom: Earbuds will not pair with phone/laptop or only one earbud produces audio.
+- Step 1: Place both earbuds back inside the charging case and close the lid for 10 seconds. Reopen case and try reconnecting.
+- Step 2: Clear previous Bluetooth bond: On your phone/laptop, go to Bluetooth settings and select "Forget Device" for TechPro Earbuds Air Pro.
+- Step 3: Factory Reset Earbuds: Place both earbuds in the open charging case. Press and hold the Setup Button on the back of the case for 10 seconds until the case LED blinks Amber 5 times, then flashes White.
+- Step 4: Enable Bluetooth on device, search for new devices, and select "TechPro Earbuds Air Pro" to re-pair.
+
+## 4. Smartwatch Touchscreen / Sync Failures (TechPro Smartwatch Ultra 2)
+- Symptom: Watch screen unresponsive or steps/heart rate data failing to sync with TechPro Fit mobile app.
+- Step 1: Force Restart Smartwatch: Press and hold both the Side Crown button and Action button simultaneously for 12 seconds until the TechPro logo appears.
+- Step 2: Sync Failure Fix: Open TechPro Fit app on smartphone, turn phone Bluetooth OFF for 5 seconds, turn back ON, and pull down on app dashboard to trigger manual sync.
+- Step 3: Unpair and Re-pair: In TechPro Fit app -> Devices -> Remove Device. Then put Smartwatch in Pairing mode via Watch Settings -> System -> Reset Pairing.
+
+## 5. USB-C Hub Display Output Issues (TechPro 7-in-1 Hub)
+- Symptom: External monitor connected to HDMI port on hub displays "No Signal" or flickers.
+- Step 1: Confirm host device (laptop/tablet) supports DisplayPort Alt Mode (DP Alt Mode) over USB-C or Thunderbolt 3/4.
+- Step 2: Disconnect hub from computer, unplug HDMI cable from hub and monitor, wait 10 seconds, then reconnect in sequence: Hub to Laptop first, then HDMI cable to Hub.
+- Step 3: Ensure display resolution output does not exceed supported limit (4K @ 60Hz). Lower screen refresh rate in Windows Display Settings to 60Hz or 30Hz.

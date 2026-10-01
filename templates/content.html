@@ -1,1 +1,143 @@
-{% extends "base.html" %}{% block content %}<h2>Content Understanding</h2><p>Upload a document, image, audio or video file and choose an analyzer supported by your resource.</p><input id="f" type="file"><input id="a" value="prebuilt-documentSearch" placeholder="Analyzer name"><button onclick="go()">Analyze</button><pre id="o"></pre><script>async function go(){let x=new FormData();x.append('file',f.files[0]);x.append('analyzer',a.value);o.textContent="Loading...";let r=await fetch('/api/content-understanding',{method:'POST',body:x});let j=await r.json();o.textContent=j.result?JSON.stringify(j.result,null,2):j.error}</script>{% endblock %}
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .page-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .page-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #FFF;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .dropzone {
+    border: 2px dashed var(--border-color);
+    border-radius: 14px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(31, 41, 55, 0.3);
+    transition: all 0.2s;
+  }
+  .dropzone:hover {
+    border-color: var(--secondary);
+    background: rgba(6, 182, 212, 0.05);
+  }
+  select.styled-select {
+    width: 100%;
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #FFF;
+    font-size: 14px;
+    outline: none;
+    margin-top: 16px;
+  }
+  .btn-action {
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .output-box {
+    background: rgba(11, 15, 25, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    color: #A5F3FC;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    margin-top: 20px;
+  }
+</style>
+
+<div class="page-card">
+  <div class="page-title">
+    <i class="fa-solid fa-layer-group" style="color: var(--secondary);"></i> Content Understanding Lab
+  </div>
+  <div class="page-subtitle">
+    Analyze PDF invoices, receipts, and product manuals using Microsoft Azure Content Understanding.
+  </div>
+
+  <div class="dropzone" onclick="document.getElementById('content-file').click()">
+    <i class="fa-solid fa-file-pdf" style="font-size: 32px; color: #F472B6; margin-bottom: 10px;"></i>
+    <p style="font-size: 14px; font-weight: 600; color: #FFF;" id="file-label">Click or drop PDF / Document here</p>
+    <p style="font-size: 12px; color: var(--text-dim);">Supports PDF, DOCX, PNG, JPG</p>
+    <input type="file" id="content-file" style="display: none;" onchange="updateFileLabel()">
+  </div>
+
+  <select id="analyzer-select" class="styled-select">
+    <option value="prebuilt-documentSearch">prebuilt-documentSearch (General Document Processing)</option>
+    <option value="prebuilt-read">prebuilt-read (OCR & Text Extraction)</option>
+    <option value="prebuilt-layout">prebuilt-layout (Structure & Tables)</option>
+  </select>
+
+  <div>
+    <button class="btn-action" onclick="runContentAnalysis()">
+      Analyze Content <i class="fa-solid fa-brain"></i>
+    </button>
+  </div>
+
+  <div id="content-output" class="output-box" style="display: none;"></div>
+</div>
+
+<script>
+  function updateFileLabel() {
+    const file = document.getElementById("content-file").files[0];
+    if (file) {
+      document.getElementById("file-label").innerText = "Selected: " + file.name;
+    }
+  }
+
+  async function runContentAnalysis() {
+    const file = document.getElementById("content-file").files[0];
+    const analyzer = document.getElementById("analyzer-select").value;
+    if (!file) {
+      alert("Please select a document file.");
+      return;
+    }
+
+    const out = document.getElementById("content-output");
+    out.style.display = "block";
+    out.innerText = "Analyzing document with Azure Content Understanding...";
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("analyzer", analyzer);
+
+    try {
+      const res = await fetch("/api/content-understanding", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      out.innerText = JSON.stringify(data.result || data, null, 2);
+    } catch(e) {
+      out.innerText = "Error analyzing document content.";
+    }
+  }
+</script>
+{% endblock %}

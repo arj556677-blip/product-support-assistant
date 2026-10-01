@@ -1,0 +1,24 @@
+# TechPro Consumer Electronics - FAQ, Warranty Policies & Support Guidelines
+
+## 1. Warranty Coverage Policy
+- Standard Warranty Period: All new TechPro hardware products carry a 12-month (1 year) Limited Manufacturer Warranty from the original date of purchase.
+- Premium Extended Warranty: Customers who purchased TechPro Care+ protection receive 24 or 36 months total warranty coverage including accidental damage protection.
+- What is Covered: Defects in materials, manufacturing flaws, component failure under normal operating conditions, battery capacity dropping below 80% within warranty period.
+- What is NOT Covered: Cosmetic damage (scratches, dents), liquid spill damage (unless covered by Care+), unauthorized modifications or third-party repairs, loss or theft, normal wear and tear.
+
+## 2. Return & Refund Policy
+- 30-Day Money-Back Guarantee: Customers may return any product purchased directly from TechPro official store within 30 days of delivery for a full refund.
+- Condition Requirement: Items must be returned in original packaging with all included cables, accessories, and user documentation intact without physical damage.
+- Processing Time: Refunds are issued back to the original payment method within 5-7 business days following inspection at our processing hub.
+
+## 3. How to Submit a Warranty Claim
+- Step 1: Locate your product serial number (e.g. SN1001, printed on the bottom of device or product box).
+- Step 2: Verify your warranty status online using our official Warranty Checker or contact AI Assistant with your serial number.
+- Step 3: Submit proof of purchase (invoice or receipt) and description of the defect through the TechPro Support Portal.
+- Step 4: Once approved, a prepaid shipping label will be issued for mail-in repair or replacement at an authorized service center.
+
+## 4. Human Support Escalation Policy
+- When to Escalate to Human Support: If a hardware problem persists after performing official troubleshooting steps, or if liquid damage/hardware damage is suspected, or for custom enterprise volume licensing.
+- Contact Support Hours: Live chat and telephone support are available Monday through Friday, 8:00 AM to 8:00 PM EST.
+- Official Email: support@techpro-electronics.com | Phone: +1 (800) 555-TECH (8324).
+- Authorized Service Centers: Nationwide network of certified technicians available for walk-in repair in major cities.

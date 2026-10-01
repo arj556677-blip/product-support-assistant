@@ -1,1 +1,119 @@
-{% extends "base.html" %}{% block content %}<h2>Text Analysis</h2><textarea id="t" rows="10" placeholder="Paste text"></textarea><button onclick="go()">Analyze</button><pre id="o"></pre><script>async function go(){let r=await fetch('/api/text-analysis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t.value})});let j=await r.json();o.textContent=j.result||j.error}</script>{% endblock %}
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .page-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .page-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #FFF;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  textarea.styled-textarea {
+    width: 100%;
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    color: #FFF;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    resize: vertical;
+    min-height: 140px;
+  }
+  textarea.styled-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 12px var(--primary-glow);
+  }
+  .btn-action {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-action:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+  }
+  .output-box {
+    background: rgba(11, 15, 25, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 14px;
+    color: #E5E7EB;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    margin-top: 16px;
+  }
+</style>
+
+<div class="page-card">
+  <div class="page-title">
+    <i class="fa-solid fa-file-lines" style="color: var(--secondary);"></i> Text Analytics Lab
+  </div>
+  <div class="page-subtitle">
+    Analyze sentiment, extract keywords & entities, and summarize product feedback using Azure OpenAI.
+  </div>
+
+  <textarea id="analysis-input" class="styled-textarea" placeholder="Paste customer support tickets, product reviews, or technical issue logs here..."></textarea>
+  
+  <div>
+    <button class="btn-action" onclick="runTextAnalysis()">
+      Analyze Text <i class="fa-solid fa-wand-magic-sparkles"></i>
+    </button>
+  </div>
+
+  <div id="analysis-output" class="output-box" style="display: none;"></div>
+</div>
+
+<script>
+  async function runTextAnalysis() {
+    const text = document.getElementById("analysis-input").value.trim();
+    if (!text) return;
+
+    const out = document.getElementById("analysis-output");
+    out.style.display = "block";
+    out.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Analyzing with Azure OpenAI model...`;
+
+    try {
+      const res = await fetch("/api/text-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text })
+      });
+      const data = await res.json();
+      if (data.error) {
+        out.innerHTML = `<span style="color: #EF4444;">Error: ${data.error}</span>`;
+      } else {
+        out.innerHTML = data.result.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+      }
+    } catch(e) {
+      out.innerHTML = `<span style="color: #EF4444;">Error processing request.</span>`;
+    }
+  }
+</script>
+{% endblock %}
