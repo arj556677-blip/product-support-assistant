@@ -47,6 +47,10 @@
     outline: none;
     margin-top: 16px;
   }
+  input.styled-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--primary-glow);
+  }
   .btn-action {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
@@ -61,8 +65,12 @@
     gap: 8px;
     transition: all 0.2s;
   }
+  .btn-action:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
   .output-box {
-    background: rgba(11, 15, 25, 0.8);
+    background: rgba(11, 15, 25, 0.85);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
@@ -78,6 +86,60 @@
     border-radius: 10px;
     margin-top: 14px;
     display: none;
+  }
+  /* Enquiry & Chat Styles */
+  .chip-btn {
+    background: rgba(31, 41, 55, 0.7);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .chip-btn:hover {
+    border-color: var(--primary);
+    color: #FFF;
+    background: rgba(99, 102, 241, 0.15);
+  }
+  .chat-msg {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .user-msg {
+    align-self: flex-end;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: 12px 12px 2px 12px;
+    padding: 10px 14px;
+    color: #FFF;
+    max-width: 85%;
+  }
+  .assistant-msg {
+    align-self: flex-start;
+    background: rgba(17, 24, 39, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 12px 12px 12px 2px;
+    padding: 12px 16px;
+    color: #E5E7EB;
+    max-width: 90%;
+  }
+  .mic-recording {
+    background: #EF4444 !important;
+    color: white !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
   }
 </style>
 
@@ -108,7 +170,72 @@
   <div id="vision-output" class="output-box" style="display: none;"></div>
 </div>
 
+<!-- INTERACTIVE FOLLOW-UP CHAT & VOICE ENQUIRY CARD -->
+<div id="enquiry-card" class="page-card" style="display: none; border-color: rgba(99, 102, 241, 0.4); background: rgba(17, 24, 39, 0.95);">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+    <div class="page-title" style="font-size: 16px; margin: 0;">
+      <i class="fa-solid fa-comments" style="color: var(--secondary);"></i> Enquiry Assistant (Grounding on Vision Result)
+    </div>
+    <div style="font-size: 12px; color: #10B981; display: flex; align-items: center; gap: 6px; font-weight: 600;">
+      <i class="fa-solid fa-circle-check"></i> Analysis Grounded
+    </div>
+  </div>
+
+  <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+    Ask questions or speak about the analyzed image below:
+  </p>
+
+  <!-- Quick Suggestions -->
+  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+    <button class="chip-btn" onclick="sendQuickQuestion('Summarize the key hardware findings in simple terms.')">
+      <i class="fa-solid fa-lightbulb" style="color: #F59E0B;"></i> Key Findings
+    </button>
+    <button class="chip-btn" onclick="sendQuickQuestion('Are there any physical defects or safety concerns reported?')">
+      <i class="fa-solid fa-shield-halved" style="color: #10B981;"></i> Defect Inspection
+    </button>
+    <button class="chip-btn" onclick="sendQuickQuestion('Explain the connected devices identified in this image.')">
+      <i class="fa-solid fa-network-wired" style="color: #6366F1;"></i> Connected Devices
+    </button>
+    <button class="chip-btn" onclick="sendQuickQuestion('How do I troubleshoot or connect the USB port device?')">
+      <i class="fa-solid fa-plug" style="color: #EC4899;"></i> Port Troubleshooting
+    </button>
+  </div>
+
+  <!-- Messages History Stream -->
+  <div id="enquiry-messages" style="max-height: 380px; overflow-y: auto; padding: 14px; background: rgba(11, 15, 25, 0.7); border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 14px; display: flex; flex-direction: column; gap: 12px;">
+    <div class="chat-msg assistant-msg">
+      <i class="fa-solid fa-robot" style="color: var(--primary); margin-top: 3px;"></i>
+      <div>
+        I'm ready to answer any questions about your vision analysis. You can type below or click the <strong style="color:#EF4444;"><i class="fa-solid fa-microphone"></i> Microphone</strong> to speak!
+      </div>
+    </div>
+  </div>
+
+  <!-- Speech Status Bar -->
+  <div id="voice-indicator" style="display: none; font-size: 12px; color: #EF4444; margin-bottom: 10px; align-items: center; gap: 8px; font-weight: 600; padding: 6px 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+    <i class="fa-solid fa-wave-square fa-beat" style="font-size: 14px;"></i> Listening... Speak your question now!
+  </div>
+
+  <!-- Input Toolbar with Voice STT & TTS -->
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <button id="mic-btn" onclick="toggleVoiceInput()" title="Voice Input (Click to speak)" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #EF4444; width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+      <i class="fa-solid fa-microphone" id="mic-icon" style="font-size: 18px;"></i>
+    </button>
+
+    <input type="text" id="enquiry-input" class="styled-input" style="margin-top: 0; flex: 1; height: 44px;" placeholder="Ask follow-up question or tap mic to speak..." onkeydown="if(event.key==='Enter') sendEnquiry()">
+
+    <button onclick="sendEnquiry()" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; color: white; padding: 0 20px; height: 44px; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+      Send <i class="fa-solid fa-paper-plane"></i>
+    </button>
+  </div>
+</div>
+
 <script>
+  let currentAnalysisContext = "";
+  let chatHistory = [];
+  let recognition = null;
+  let isRecording = false;
+
   function previewImage() {
     const file = document.getElementById("vision-file").files[0];
     const img = document.getElementById("img-preview");
@@ -127,8 +254,9 @@
     }
 
     const out = document.getElementById("vision-output");
+    const enquiryCard = document.getElementById("enquiry-card");
     out.style.display = "block";
-    out.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing image with Vision model...`;
+    out.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing image with Multimodal Vision model...`;
 
     const formData = new FormData();
     formData.append("image", file);
@@ -142,12 +270,170 @@
       const data = await res.json();
       if (data.error) {
         out.innerHTML = `<span style="color: #EF4444;">Error: ${data.error}</span>`;
+        enquiryCard.style.display = "none";
       } else {
+        currentAnalysisContext = data.result;
         out.innerHTML = data.result.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        
+        // Show Enquiry & Voice card
+        enquiryCard.style.display = "block";
+        enquiryCard.scrollIntoView({ behavior: 'smooth' });
       }
     } catch(e) {
       out.innerHTML = `<span style="color: #EF4444;">Error analyzing image.</span>`;
+      enquiryCard.style.display = "none";
     }
+  }
+
+  function sendQuickQuestion(txt) {
+    document.getElementById("enquiry-input").value = txt;
+    sendEnquiry();
+  }
+
+  async function sendEnquiry() {
+    const inputEl = document.getElementById("enquiry-input");
+    const question = inputEl.value.trim();
+    if (!question || !currentAnalysisContext) return;
+
+    inputEl.value = "";
+    const msgContainer = document.getElementById("enquiry-messages");
+
+    // Add User Message
+    const userDiv = document.createElement("div");
+    userDiv.className = "chat-msg user-msg";
+    userDiv.innerHTML = `<div>${escapeHtml(question)}</div>`;
+    msgContainer.appendChild(userDiv);
+
+    // Add Thinking Placeholder
+    const thinkingId = "think-" + Date.now();
+    const assistantDiv = document.createElement("div");
+    assistantDiv.className = "chat-msg assistant-msg";
+    assistantDiv.id = thinkingId;
+    assistantDiv.innerHTML = `<i class="fa-solid fa-robot" style="color: var(--primary);"></i> <div><i class="fa-solid fa-spinner fa-spin"></i> Analyzing context...</div>`;
+    msgContainer.appendChild(assistantDiv);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+
+    chatHistory.push({ role: "user", content: question });
+
+    try {
+      const res = await fetch("/api/enquire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          context: currentAnalysisContext,
+          question: question,
+          history: chatHistory
+        })
+      });
+      const data = await res.json();
+      const answerEl = document.getElementById(thinkingId);
+
+      if (data.error) {
+        answerEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#EF4444;"></i> <div style="color:#EF4444;">Error: ${data.error}</div>`;
+      } else {
+        chatHistory.push({ role: "assistant", content: data.answer });
+        const formattedAnswer = data.answer.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        
+        answerEl.innerHTML = `
+          <i class="fa-solid fa-robot" style="color: var(--primary); margin-top: 3px;"></i>
+          <div style="flex: 1;">
+            ${formattedAnswer}
+            <div style="margin-top: 8px;">
+              <button onclick="speakText('${escapeForJs(data.answer)}')" class="chip-btn" style="background: rgba(99,102,241,0.2); color:#A5B4FC;">
+                <i class="fa-solid fa-volume-high"></i> Listen Answer
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    } catch(e) {
+      const answerEl = document.getElementById(thinkingId);
+      answerEl.innerHTML = `<i class="fa-solid fa-circle-xmark" style="color:#EF4444;"></i> <div style="color:#EF4444;">Error processing request.</div>`;
+    }
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+
+  // Voice Input (Speech-to-Text)
+  function toggleVoiceInput() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please try Google Chrome or Microsoft Edge.");
+      return;
+    }
+
+    const micBtn = document.getElementById("mic-btn");
+    const indicator = document.getElementById("voice-indicator");
+
+    if (isRecording) {
+      if (recognition) recognition.stop();
+      return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+      isRecording = true;
+      micBtn.classList.add("mic-recording");
+      indicator.style.display = "flex";
+    };
+
+    recognition.onresult = (event) => {
+      let transcript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      document.getElementById("enquiry-input").value = transcript;
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech Recognition Error:", event.error);
+      stopVoiceUI();
+    };
+
+    recognition.onend = () => {
+      stopVoiceUI();
+      const text = document.getElementById("enquiry-input").value.trim();
+      if (text) {
+        sendEnquiry();
+      }
+    };
+
+    recognition.start();
+  }
+
+  function stopVoiceUI() {
+    isRecording = false;
+    const micBtn = document.getElementById("mic-btn");
+    const indicator = document.getElementById("voice-indicator");
+    if (micBtn) micBtn.classList.remove("mic-recording");
+    if (indicator) indicator.style.display = "none";
+  }
+
+  // Text-to-Speech (Optional Audio Output)
+  function speakText(text) {
+    if (!('speechSynthesis' in window)) return;
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel(); // Toggle stop if currently playing
+      return;
+    }
+    
+    // Clean markdown symbols for clean voice synthesis
+    const cleanText = text.replace(/[*#_`-]/g, ' ');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function escapeForJs(str) {
+    return str.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, ' ');
   }
 </script>
 {% endblock %}

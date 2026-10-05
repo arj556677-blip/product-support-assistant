@@ -161,6 +161,48 @@ def api_vision():
         return jsonify(result=r.output_text)
     except Exception as e: return jsonify(error=str(e)), 500
 
+@app.post("/api/enquire")
+def api_enquire():
+    """Allows users to chat & enquire via text or voice about an inspection or analysis result."""
+    try:
+        data = request.json or {}
+        context = data.get("context", "").strip()
+        question = data.get("question", "").strip()
+        history = data.get("history", [])
+
+        if not question or not context:
+            return jsonify(error="Analysis context and question are required."), 400
+
+        system_msg = (
+            "You are an expert AI Hardware Inspection & Technical Support Assistant. "
+            "The user is asking follow-up questions regarding the following inspection analysis result:\n\n"
+            f"--- ANALYSIS RESULT ---\n{context}\n-----------------------\n\n"
+            "Answer the user's questions clearly, accurately, and concisely based on the analysis context above. "
+            "Provide helpful hardware advice, device descriptions, port identification, or troubleshooting steps."
+        )
+
+        messages = [{"role": "system", "content": system_msg}]
+        for item in history[-6:]:
+            if isinstance(item, dict) and item.get("role") and item.get("content"):
+                messages.append({"role": item["role"], "content": item["content"]})
+        messages.append({"role": "user", "content": question})
+
+        cli = client()
+        try:
+            r = cli.chat.completions.create(
+                model=TEXT_MODEL,
+                messages=messages
+            )
+            answer = r.choices[0].message.content
+        except Exception:
+            full_prompt = f"{system_msg}\n\nUser Question: {question}"
+            r = cli.responses.create(model=TEXT_MODEL, input=full_prompt)
+            answer = getattr(r, "output_text", str(r))
+
+        return jsonify(answer=answer)
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
 @app.get("/speech")
 def speech(): 
     return render_template("index.html")
